@@ -1,3 +1,15 @@
 # dependencies
 /node_modules
 /package-lock.json
+
+# Arquivo de variáveis de ambiente - NUNCA ENVIE ESTE ARQUIVO!
+.env
+
+# Pasta de código compilado do TypeScript
+# Este código é gerado a partir do seu código .ts e não deve ser versionado
+/dist
+
+# Logs de debug do NPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
