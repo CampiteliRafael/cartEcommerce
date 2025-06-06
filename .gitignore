@@ -1,6 +1,7 @@
 # Arquivos de Sistema Operacional
 .DS_Store
 Thumbs.db
+.env
 
 # Arquivos de configuração de IDEs
 .idea/
