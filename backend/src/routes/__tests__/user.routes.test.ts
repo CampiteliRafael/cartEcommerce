@@ -84,3 +84,69 @@ describe('POST /api/users/register', () => {
     });
   });
 });
+
+// NOVO BLOCO DE TESTES PARA O LOGIN
+describe('POST /api/users/login', () => {
+
+  describe('Dado um e-mail e senha válidos', () => {
+    it('deve retornar um token de acesso (JWT) e status 200', async () => {
+      const loginInput = {
+        email: 'usuario.existente@example.com',
+        password: 'SenhaCorreta123!',
+      };
+      
+      const mockAccessToken = 'mock-jwt-token-string';
+
+      // Mockamos o serviço de login para simular um login bem-sucedido
+      const loginServiceMock = jest
+        .spyOn(UserService, 'loginUserService')
+        // Quando o serviço for chamado com os dados corretos, ele deve resolver com um token
+        .mockResolvedValue(mockAccessToken);
+
+      const response = await request(app)
+        .post('/api/users/login')
+        .send(loginInput);
+      
+      // Esperamos uma resposta de sucesso
+      expect(response.status).toBe(200);
+      // O corpo da resposta deve conter o token de acesso
+      expect(response.body).toEqual({ accessToken: mockAccessToken });
+      // Verificamos se o serviço foi chamado corretamente
+      expect(loginServiceMock).toHaveBeenCalledWith(loginInput);
+    });
+  });
+
+  describe('Dado um e-mail ou senha inválidos', () => {
+    it('deve retornar status 401 Unauthorized', async () => {
+      const loginInput = {
+        email: 'usuario.nao.existe@example.com',
+        password: 'senha-errada',
+      };
+
+      // Mockamos o serviço para simular um erro de "credenciais inválidas"
+      const loginServiceMock = jest
+        .spyOn(UserService, 'loginUserService')
+        .mockRejectedValue(new Error('Invalid email or password'));
+
+      const response = await request(app)
+        .post('/api/users/login')
+        .send(loginInput);
+      
+      // Por segurança, NUNCA dizemos se foi o e-mail ou a senha que errou.
+      // Apenas retornamos um erro genérico de "Não Autorizado".
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('Quando falta um campo (e-mail or senha)', () => {
+    it('deve retornar status 400 Bad Request', async () => {
+        const response = await request(app)
+          .post('/api/users/login')
+          .send({ email: 'usuario.valido@example.com' }); // Enviando sem a senha
+
+        // Este erro deve ser pego pela nossa validação do Zod, antes de chegar ao serviço
+        expect(response.status).toBe(400);
+    });
+  });
+
+});
