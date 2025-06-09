@@ -21,3 +21,14 @@ export const createUserSchema = z.object({
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>['body'];
+
+// SCHEMA PARA LOGIN
+
+export const loginUserSchema = z.object ({ 
+  body: z.object ({ 
+    email: z.string ({ required_error: 'O e-mail é obrigatório.' })
+    .email({ message: 'Formato de e-mail inválido' }),
+    password: z.string({ required_error: 'A senha é obrigatória.' })
+    .min( 1, 'A senha não pode estar vazia.' ),
+   })
+ })
