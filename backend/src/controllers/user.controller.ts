@@ -38,3 +38,16 @@ export async function loginUserHandler(req: Request<{}, {}, LoginUserInput>, res
     return;
   }
 }
+
+export async function getCurrentUserHandler(req: Request, res: Response) {
+  
+  const user = res.locals.user;
+  
+  if (!user) {
+    res.status(404).send('Usuário não encontrado');
+    return;
+  }
+
+  res.status(200).send(user);
+  return;
+}

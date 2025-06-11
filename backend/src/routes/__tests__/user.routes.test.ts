@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../../app';
 import * as UserService from '../../services/UserService';
+import { signJwt } from '../../utils/jwt.utils';
 
 describe('POST /api/users/register', () => {
   describe('Quando os dados são válidos', () => {
@@ -148,5 +149,51 @@ describe('POST /api/users/login', () => {
         expect(response.status).toBe(400);
     });
   });
+
+  describe('GET /api/users/me', () => {
+
+  describe('Dado que o usuário não está logado (não fornece token)', () => {
+    it('deve retornar um erro 401 Unauthorized', async () => {
+      const response = await request(app).get('/api/users/me');
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('Dado que o usuário está logado (fornece um token válido)', () => {
+    it('deve retornar os dados do usuário e um status 200', async () => {
+      const userPayload = {
+        userId: 'mock-user-id',
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+      };
+      
+      // Criamos um token válido para nosso teste usando nossa função utilitária
+      const token = signJwt(userPayload);
+
+      const response = await request(app)
+        .get('/api/users/me')
+        // Adicionamos o cabeçalho de autorização com o token
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
+      // O corpo da resposta deve conter os dados do usuário que estavam no token
+      expect(response.body).toEqual(expect.objectContaining(userPayload));
+    });
+  });
+
+  describe('Dado que o usuário fornece um token inválido ou malformado', () => {
+    it('deve retornar um erro 401 Unauthorized', async () => {
+        const invalidToken = 'this-is-not-a-valid-token';
+        
+        const response = await request(app)
+          .get('/api/users/me')
+          .set('Authorization', `Bearer ${invalidToken}`);
+
+        expect(response.status).toBe(401);
+    });
+  });
+
+});
 
 });

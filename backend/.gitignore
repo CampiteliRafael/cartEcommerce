@@ -4,6 +4,8 @@
 
 # Arquivo de variáveis de ambiente - NUNCA ENVIE ESTE ARQUIVO!
 .env
+*.log
+mongo-data/
 
 # Pasta de código compilado do TypeScript
 # Este código é gerado a partir do seu código .ts e não deve ser versionado
