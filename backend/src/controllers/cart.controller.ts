@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addItemToCartService } from '../services/cart.service';
+import { addItemToCartService, findUserCartService } from '../services/cart.service';
 
 export async function addItemToCartHandler(req: Request, res: Response) {
   const userId = res.locals.user.userId;
@@ -14,6 +14,19 @@ export async function addItemToCartHandler(req: Request, res: Response) {
       res.status(404).send(e.message);
       return;
     }
+    res.status(500).send('Erro interno do servidor.');
+    return;
+  }
+};
+
+export async function getUserCartHandler(req: Request, res: Response) {
+  const userId = res.locals.user.userId;
+
+  try {
+    const cart = await findUserCartService(userId);
+    res.status(200).send(cart);
+    return;
+  } catch (e: any) {
     res.status(500).send('Erro interno do servidor.');
     return;
   }
