@@ -48,3 +48,29 @@ export async function findUserCartService(userId: string) {
 
   return cart;
 }
+
+export async function updateItemQuantityService(
+  userId: string,
+  productId: string,
+  quantity: number
+) {
+
+  const cart = await CartModel.findOne({ user: userId });
+
+  if (!cart) {
+    throw new Error("Item não encontrado no carrinho.");
+  }
+
+  const itemIndex = cart.items.findIndex(
+    (item) => item.product.toString() === productId
+  );
+
+  if (itemIndex === -1) {
+    throw new Error("Item não encontrado no carrinho.");
+  }
+
+  cart.items[itemIndex].quantity = quantity;
+
+  await cart.save();
+  return cart.populate({ path: "items.product", model: "Product" });
+}
