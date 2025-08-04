@@ -3,6 +3,8 @@ import app from "../../app";
 import { signJwt } from "../../utils/jwt.utils";
 import * as CartService from "../../services/cart.service";
 import * as ProductService from "../../services/ProductService";
+import mongoose from "mongoose";
+import { CartDocument } from "../../models/Cart.model";
 
 const userPayload = {
   userId: "user-123",
@@ -23,6 +25,9 @@ const cartItemInput = {
 };
 
 describe("Rotas do Carrinho", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
   describe("POST /api/cart/items", () => {
     it("deve retornar 401 Unauthorized se o usuário não estiver logado", async () => {
       const response = await request(app)
@@ -132,6 +137,70 @@ describe("Rotas do Carrinho", () => {
       expect(response.status).toBe(200);
       expect(response.body.items).toBeInstanceOf(Array);
       expect(response.body.items).toHaveLength(0);
+    });
+  });
+  describe("PUT /api/cart/items/:productId", () => {
+    const token = signJwt(userPayload);
+
+    it("deve retornar 401 Unauthorized se o usuário não estiver logado", async () => {
+      const productId = "product-abc";
+      const response = await request(app)
+        .put(`/api/cart/items/${productId}`)
+        .send({ quantity: 5 });
+      expect(response.status).toBe(401);
+    });
+
+    it("deve atualizar a quantidade de um item existente e retornar 200 com o carrinho atualizado", async () => {
+      const newQuantity = 5;
+      const productId = new mongoose.Types.ObjectId().toHexString();
+
+      const mockCart: CartDocument = {
+        user: userPayload.userId,
+        items: [
+          {
+            product: productId,
+            quantity: newQuantity,
+            price: 100,
+          },
+        ],
+        __v: 0,
+        $assertPopulated: jest.fn(),
+        $set: jest.fn(),
+        increment: jest.fn(),
+        save: jest.fn(),
+        validate: jest.fn(),
+      } as any;
+
+      const updateItemQuantityServiceMock = jest
+        .spyOn(CartService, "updateItemQuantityService")
+        .mockResolvedValue(mockCart as any);
+
+      const response = await request(app)
+        .put(`/api/cart/items/${productId}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ quantity: newQuantity });
+
+      expect(response.status).toBe(200);
+      expect(response.body.items[0].quantity).toBe(newQuantity);
+      expect(updateItemQuantityServiceMock).toHaveBeenCalledWith(
+        userPayload.userId,
+        productId,
+        newQuantity
+      );
+    });
+
+    it("deve retornar 404 Not Found se o item não estiver no carrinho do usuário", async () => {
+      const nonExistentProductId = "product-not-in-cart";
+      const updateItemQuantityServiceMock = jest
+        .spyOn(CartService, "updateItemQuantityService")
+        .mockRejectedValue(new Error("Item não encontrado no carrinho."));
+
+      const response = await request(app)
+        .put(`/api/cart/items/${nonExistentProductId}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ quantity: 3 });
+
+      expect(response.status).toBe(404);
     });
   });
 });

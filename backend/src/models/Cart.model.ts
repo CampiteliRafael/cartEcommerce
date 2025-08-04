@@ -9,6 +9,7 @@ interface CartItem {
 export interface CartDocument extends Document {
   user: mongoose.Types.ObjectId; 
   items: CartItem[];
+  __v: 0;
 }
 
 const cartItemSchema = new Schema<CartItem>({
