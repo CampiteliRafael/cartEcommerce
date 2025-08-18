@@ -273,14 +273,3 @@ docker-compose logs -f
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-- 📧 Email: suporte@ecommerce-cart.com
-- 💬 Discord: [Link do servidor]
-- 📖 Documentação: [Link da documentação]
-
----
-
-**Desenvolvido com ❤️ para a comunidade de desenvolvedores**
