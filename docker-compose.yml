@@ -11,7 +11,7 @@ services: # A lista de "serviços" (containers) que queremos rodar
     ports:
       # Mapeia a porta da sua máquina (esquerda) para a porta do container (direita)
       # Isso permite que nossa aplicação Node.js em localhost:27017 se conecte ao banco dentro do container
-      - "27018:27017"
+      - "27017:27017"
       
     volumes:
       # Garante que os dados do banco de dados sejam salvos e persistam mesmo se o container for removido
