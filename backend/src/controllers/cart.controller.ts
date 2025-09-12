@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addItemToCartService, findUserCartService, updateItemQuantityService } from '../services/cart.service';
+import { addItemToCartService, findUserCartService, updateItemQuantityService, removeItemFromCartService } from '../services/cart.service';
 
 export async function addItemToCartHandler(req: Request, res: Response) {
   const userId = res.locals.user.userId;
@@ -11,10 +11,10 @@ export async function addItemToCartHandler(req: Request, res: Response) {
     return;
   } catch (e: any) {
     if (e.message === 'Produto não encontrado.') {
-      res.status(404).send(e.message);
+      res.status(404).send({ message: e.message });
       return;
     }
-    res.status(500).send('Erro interno do servidor.');
+    res.status(500).send({ message: 'Erro interno do servidor.' });
     return;
   }
 };
@@ -27,7 +27,7 @@ export async function getUserCartHandler(req: Request, res: Response) {
     res.status(200).send(cart);
     return;
   } catch (e: any) {
-    res.status(500).send('Erro interno do servidor.');
+    res.status(500).send({ message: 'Erro interno do servidor.' });
     return;
   }
 };
@@ -43,10 +43,28 @@ export async function updateItemQuantityHandler(req: Request, res: Response) {
     return;
   } catch (e: any) {
     if (e.message === 'Item não encontrado no carrinho.') {
-      res.status(404).send(e.message);
+      res.status(404).send({ message: e.message });
       return;
     }
-    res.status(500).send('Erro interno do servidor.');
+    res.status(500).send({ message: 'Erro interno do servidor.' });
+    return;
+  }
+};
+
+export async function removeItemFromCartHandler(req: Request, res: Response) {
+  const userId = res.locals.user.userId;
+  const { productId } = req.params;
+
+  try {
+    const updatedCart = await removeItemFromCartService(userId, productId);
+    res.status(200).send(updatedCart);
+    return;
+  } catch (e: any) {
+    if (e.message === 'Item não encontrado no carrinho.') {
+      res.status(404).send({ message: e.message });
+      return;
+    }
+    res.status(500).send({ message: 'Erro interno do servidor.' });
     return;
   }
 };

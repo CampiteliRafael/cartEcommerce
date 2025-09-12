@@ -8,7 +8,6 @@ export default function NewsletterSection() {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica para inscrição na newsletter
     alert(`Email ${email} inscrito com sucesso!`);
     setEmail("");
   };

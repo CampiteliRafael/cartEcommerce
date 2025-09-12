@@ -5,12 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   
   const { register, authState, isLoading, error } = useAuth();
   const router = useRouter();
@@ -21,9 +24,26 @@ export default function RegisterPage() {
     }
   }, [authState.isAuthenticated, router]);
 
+  useEffect(() => {
+    if (password && !passwordRegex.test(password)) {
+      setPasswordError(
+        "A senha deve conter no mínimo 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um caractere especial."
+      );
+    } else {
+      setPasswordError(null);
+    }
+  }, [password]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setFormError(null);
+
+    if (!passwordRegex.test(password)) {
+      setFormError(
+        "A senha deve conter no mínimo 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um caractere especial."
+      );
+      return;
+    }
 
     if (password !== confirmPassword) {
       setFormError("As senhas não coincidem");
@@ -82,10 +102,19 @@ export default function RegisterPage() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+              className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring ${
+                passwordError ? "border-red-300" : "focus:border-blue-300"
+              }`}
               required
-              minLength={6}
+              minLength={8}
             />
+            {passwordError && (
+              <p className="text-red-600 text-sm mt-1">{passwordError}</p>
+            )}
+            <p className="text-gray-600 text-xs mt-1">
+              A senha deve conter no mínimo 8 caracteres, incluindo uma letra maiúscula, 
+              uma minúscula, um número e um caractere especial (@$!%*?&).
+            </p>
           </div>
 
           <div className="mb-6">
@@ -99,13 +128,13 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !!passwordError}
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400"
           >
             {isLoading ? "Cadastrando..." : "Cadastrar"}

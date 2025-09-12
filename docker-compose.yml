@@ -1,6 +1,6 @@
 # /ecommerce-app/docker-compose.yml
 
-version: '3.8' # Define a versão do Docker Compose a ser usada
+
 
 services: # A lista de "serviços" (containers) que queremos rodar
   

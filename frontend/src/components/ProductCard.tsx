@@ -8,7 +8,6 @@ interface ProductCardProps {
   product: Product;
 }
 
-// Componente separado para avaliações em estrelas
 const StarRating = ({ rating = 4.5 }) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 !== 0;
@@ -40,7 +39,6 @@ const StarRating = ({ rating = 4.5 }) => {
   );
 };
 
-// Componente de botão reutilizável
 const Button = ({ 
   children, 
   onClick, 
@@ -85,7 +83,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     setShowQuantity(false);
   };
 
-  // Calcular desconto fictício para efeito visual
   const originalPrice = product.price * 1.2;
   const discountPercentage = Math.round((1 - product.price / originalPrice) * 100);
 
@@ -99,19 +96,16 @@ export default function ProductCard({ product }: ProductCardProps) {
       }}
     >
       <div className="relative">
-        {/* Badge de desconto */}
         <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
           -{discountPercentage}%
         </div>
         
-        {/* Badge de estoque baixo */}
         {product.stock <= 5 && product.stock > 0 && (
           <div className="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
             Últimas unidades
           </div>
         )}
         
-        {/* Imagem do produto */}
         <div className="relative h-48 w-full overflow-hidden">
           {product.imageUrl ? (
             <Image
@@ -128,7 +122,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
           
-          {/* Overlay com botões de ação rápida - visível apenas em desktop */}
           <div 
             className={`absolute inset-0 bg-black bg-opacity-20 items-center justify-center gap-2 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'} hidden md:flex`}
           >
@@ -158,23 +151,19 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
-        {/* Categoria do produto */}
         <div className="text-xs text-gray-500 mb-1">Categoria</div>
         
-        {/* Nome do produto */}
         <Link href={`/product/${product._id}`} className="hover:text-indigo-600 transition-colors">
           <h3 className="text-sm font-medium mb-1 line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
         </Link>
-        
-        {/* Avaliações */}
+ 
         <div className="flex items-center gap-1 mb-2">
           <StarRating rating={4.5} />
           <span className="text-xs text-gray-500">(24)</span>
         </div>
         
-        {/* Preço */}
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg font-bold text-gray-900">
             {new Intl.NumberFormat('pt-BR', {
@@ -190,12 +179,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           </span>
         </div>
         
-        {/* Descrição curta */}
         <p className="text-xs text-gray-600 mb-4 line-clamp-2 min-h-[2rem]">
           {product.description}
         </p>
 
-        {/* Controle de quantidade e botão de adicionar ao carrinho */}
         <div className="mt-auto">
           {showQuantity ? (
             <div className="flex items-center gap-2">
@@ -238,7 +225,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
         
-        {/* Indicador de disponibilidade */}
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-center">
             <span className={`inline-block w-2 h-2 rounded-full mr-1 ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>

@@ -16,11 +16,9 @@ export async function createUserHandler(
     return;
 
   } catch (e: any) {
-    if (e.message.includes('User already exists')) {
-      res.status(409).send(e.message);
-      return;
-    }
-    res.status(500).send(e.message);
+    const statusCode = e.statusCode || 500;
+  
+    res.status(statusCode).send({ message: e.message });
     return;
   }
 }
@@ -30,11 +28,11 @@ type LoginUserInput = z.infer<typeof loginUserSchema>['body'];
 export async function loginUserHandler(req: Request<{}, {}, LoginUserInput>, res: Response) {
   try {
     const accessToken = await loginUserService(req.body);
-
-    res.status(200).send({ accessToken });
+    res.status(200).send({ token: accessToken });
     return;
   } catch (e: any) {
-    res.status(401).send(e.message);
+    const statusCode = e.statusCode || 401;
+    res.status(statusCode).send({ message: e.message });
     return;
   }
 }
@@ -44,7 +42,7 @@ export async function getCurrentUserHandler(req: Request, res: Response) {
   const user = res.locals.user;
   
   if (!user) {
-    res.status(404).send('Usuário não encontrado');
+    res.status(404).send({ message: 'Usuário não encontrado' });
     return;
   }
 

@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
 
-// Componente para o ícone do carrinho com contador
 const CartIcon = ({ count = 0 }) => {
   return (
     <div className="relative">
@@ -33,7 +32,6 @@ const CartIcon = ({ count = 0 }) => {
   );
 };
 
-// Componente para links de navegação
 const NavLink = ({ href, children, className = "" }) => {
   return (
     <Link 
@@ -51,7 +49,6 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Detectar scroll para ajustar o header
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -72,7 +69,6 @@ export default function Header() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Desktop Header */}
         <div className="hidden md:flex justify-between items-center h-16">
           <Link href="/" className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -165,7 +161,6 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* Mobile Header */}
         <div className="flex md:hidden justify-between items-center h-14">
           <Link href="/" className="flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -205,7 +200,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu - Usando transição para suavizar a abertura/fechamento */}
       <div 
         className={`md:hidden bg-white border-t shadow-lg overflow-hidden transition-all duration-300 ${
           mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
@@ -287,7 +281,6 @@ export default function Header() {
         </div>
       </div>
       
-      {/* Categories Navigation */}
       <div className="hidden md:block bg-gray-100 border-t border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center">

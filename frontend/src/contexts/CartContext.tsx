@@ -16,6 +16,7 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  refetchCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,16 +28,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { authState } = useAuth();
 
   const fetchCart = async () => {
-    if (!authState.isAuthenticated) return;
+    if (!authState.isAuthenticated) {
+      setCart(null);
+      return;
+    }
     
     setIsLoading(true);
     try {
       const data = await cartService.getUserCart();
       setCart(data);
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching cart:", err);
-      setError(ERROR_MESSAGES.CART.ADD_ITEM);
+      
+      if (err.message && err.message.includes("404")) {
+        setCart(null);
+      } else {
+        setError(ERROR_MESSAGES.CART.ADD_ITEM);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -48,6 +57,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } else {
       setCart(null);
     }
+  }, [authState.isAuthenticated]);
+
+  useEffect(() => {
+    if (!authState.isAuthenticated) return;
+    
+    const interval = setInterval(() => {
+      if (authState.isAuthenticated) {
+        fetchCart();
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, [authState.isAuthenticated]);
 
   const addToCart = async (productId: string, quantity: number) => {
@@ -77,12 +98,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setIsLoading(true);
     try {
-      if (quantity <= 0) {
-        await removeFromCart(productId);
-      } else {
-        const updatedCart = await cartService.updateItemQuantity(productId, quantity);
-        setCart(updatedCart);
-      }
+      const updatedCart = await cartService.updateItemQuantity(productId, quantity);
+      setCart(updatedCart);
       setError(null);
     } catch (err) {
       console.error("Error updating quantity:", err);
@@ -100,12 +117,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     setIsLoading(true);
     try {
-      const updatedCart = await cartService.updateItemQuantity(productId, 0);
-      setCart(updatedCart);
+      console.log("Removing item with ID:", productId);
+      
+      if (cart) {
+        const updatedItems = cart.items.filter(item => item.product._id !== productId);
+        setCart({
+          ...cart,
+          items: updatedItems
+        });
+      }
+      
+      await cartService.removeItem(productId);
+      
       setError(null);
     } catch (err) {
       console.error("Error removing item from cart:", err);
       setError(ERROR_MESSAGES.CART.REMOVE_ITEM);
+      
+      await fetchCart();
     } finally {
       setIsLoading(false);
     }
@@ -114,6 +143,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = () => {
     setCart(null);
   };
+
+  const refetchCart = fetchCart;
 
   const totalItems = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
   
@@ -133,7 +164,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeFromCart,
         clearCart,
         totalItems,
-        totalPrice
+        totalPrice,
+        refetchCart
       }}
     >
       {children}

@@ -4,20 +4,27 @@ import { CartItem as CartItemType } from "@/types";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 
 interface CartItemProps {
   item: CartItemType;
 }
 
-// Componente de botão para ações do carrinho
+interface CartActionButtonProps {
+  onClick?: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+  icon: ReactNode;
+  className?: string;
+}
+
 const CartActionButton = ({ 
   onClick, 
   disabled = false, 
   children, 
   icon, 
   className = "" 
-}) => {
+}: CartActionButtonProps) => {
   return (
     <button 
       onClick={onClick}
@@ -35,24 +42,43 @@ export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeFromCart, isLoading } = useCart();
   const { product, quantity, price } = item;
   const [isRemoving, setIsRemoving] = useState(false);
+  const [localQuantity, setLocalQuantity] = useState(quantity);
 
   const handleQuantityChange = async (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= product.stock) {
+      setLocalQuantity(newQuantity);
       await updateQuantity(product._id, newQuantity);
     }
   };
 
   const handleRemove = async () => {
-    setIsRemoving(true);
-    await removeFromCart(product._id);
+    try {
+      setIsRemoving(true);
+      console.log("Removing item with ID:", product._id);
+      await removeFromCart(product._id);
+    } catch (error) {
+      console.error("Error removing item:", error);
+      setIsRemoving(false);
+    }
   };
+
+  if (isRemoving) {
+    return (
+      <div className="flex items-center justify-center py-6 border-b text-gray-500 italic">
+        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Removendo item...
+      </div>
+    );
+  }
 
   return (
     <div 
-      className={`flex flex-col sm:flex-row items-start sm:items-center py-6 border-b transition-opacity duration-300 ${isRemoving ? 'opacity-50' : 'opacity-100'}`}
-      aria-busy={isRemoving}
+      className="flex flex-col sm:flex-row items-start sm:items-center py-6 border-b"
+      aria-busy={isLoading}
     >
-      {/* Imagem do produto */}
       <div className="relative h-24 w-24 flex-shrink-0 rounded-md overflow-hidden border border-gray-200">
         {product.imageUrl ? (
           <Image
@@ -70,7 +96,6 @@ export default function CartItem({ item }: CartItemProps) {
         )}
       </div>
 
-      {/* Informações do produto */}
       <div className="sm:ml-6 flex-grow mt-4 sm:mt-0 w-full sm:w-auto">
         <div className="flex flex-col sm:flex-row sm:justify-between">
           <div className="max-w-xs">
@@ -88,7 +113,7 @@ export default function CartItem({ item }: CartItemProps) {
               {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
-              }).format(price * quantity)}
+              }).format(price * localQuantity)}
             </p>
             <p className="text-sm text-gray-500">
               {new Intl.NumberFormat('pt-BR', {
@@ -101,12 +126,11 @@ export default function CartItem({ item }: CartItemProps) {
 
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
           <div className="flex items-center">
-            {/* Controle de quantidade */}
             <div className="flex items-center border border-gray-300 rounded-md">
               <button 
                 className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                onClick={() => handleQuantityChange(quantity - 1)}
-                disabled={isLoading || quantity <= 1}
+                onClick={() => handleQuantityChange(localQuantity - 1)}
+                disabled={isLoading || localQuantity <= 1}
                 type="button"
                 aria-label="Diminuir quantidade"
               >
@@ -114,11 +138,11 @@ export default function CartItem({ item }: CartItemProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                 </svg>
               </button>
-              <span className="px-3 py-1 text-sm min-w-[30px] text-center">{quantity}</span>
+              <span className="px-3 py-1 text-sm min-w-[30px] text-center">{localQuantity}</span>
               <button 
                 className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                onClick={() => handleQuantityChange(quantity + 1)}
-                disabled={isLoading || quantity >= product.stock}
+                onClick={() => handleQuantityChange(localQuantity + 1)}
+                disabled={isLoading || localQuantity >= product.stock}
                 type="button"
                 aria-label="Aumentar quantidade"
               >
@@ -128,17 +152,15 @@ export default function CartItem({ item }: CartItemProps) {
               </button>
             </div>
             
-            {/* Estoque disponível */}
             <span className="ml-3 text-xs text-gray-500">
               {product.stock} disponíveis
             </span>
           </div>
 
-          {/* Ações */}
           <div className="flex items-center gap-4">
             <CartActionButton 
               onClick={handleRemove}
-              disabled={isLoading}
+              disabled={isLoading || isRemoving}
               icon={
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 

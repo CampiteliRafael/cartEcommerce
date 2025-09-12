@@ -54,11 +54,10 @@ export async function updateItemQuantityService(
   productId: string,
   quantity: number
 ) {
-
   const cart = await CartModel.findOne({ user: userId });
 
   if (!cart) {
-    throw new Error("Item não encontrado no carrinho.");
+    throw new Error("Carrinho não encontrado.");
   }
 
   const itemIndex = cart.items.findIndex(
@@ -69,7 +68,38 @@ export async function updateItemQuantityService(
     throw new Error("Item não encontrado no carrinho.");
   }
 
-  cart.items[itemIndex].quantity = quantity;
+  if (quantity <= 0) {
+    cart.items.splice(itemIndex, 1);
+  } else {
+    cart.items[itemIndex].quantity = quantity;
+  }
+
+  await cart.save();
+  return cart.populate({ path: "items.product", model: "Product" });
+}
+
+export async function removeItemFromCartService(
+  userId: string,
+  productId: string
+) {
+  console.log(`Removing item ${productId} from cart for user ${userId}`);
+  
+  const cart = await CartModel.findOne({ user: userId });
+
+  if (!cart) {
+    throw new Error("Carrinho não encontrado.");
+  }
+
+  const itemIndex = cart.items.findIndex(
+    (item) => item.product.toString() === productId
+  );
+
+  if (itemIndex === -1) {
+    throw new Error("Item não encontrado no carrinho.");
+  }
+
+  cart.items.splice(itemIndex, 1);
+  console.log(`Item removed, remaining items: ${cart.items.length}`);
 
   await cart.save();
   return cart.populate({ path: "items.product", model: "Product" });
