@@ -1,0 +1,26 @@
+# /ecommerce-app/docker-compose.yml
+
+version: '3.8' # Define a versão do Docker Compose a ser usada
+
+services: # A lista de "serviços" (containers) que queremos rodar
+  
+  mongodb: # O nome que damos ao nosso serviço de banco de dados
+    image: mongo:latest # Diz ao Docker para usar a imagem oficial do MongoDB, na versão mais recente
+    container_name: ecommerce-mongo-db # Um nome fixo e amigável para podermos identificar nosso container
+    
+    ports:
+      # Mapeia a porta da sua máquina (esquerda) para a porta do container (direita)
+      # Isso permite que nossa aplicação Node.js em localhost:27017 se conecte ao banco dentro do container
+      - "27017:27017"
+      
+    volumes:
+      # Garante que os dados do banco de dados sejam salvos e persistam mesmo se o container for removido
+      # Essencial para não perder seus dados a cada reinicialização
+      - mongo-data:/data/db
+      
+    restart: always # Configura o container para reiniciar automaticamente se ele parar por algum motivo
+
+# Define o volume que será usado para a persistência dos dados
+volumes:
+  mongo-data:
+    driver: local

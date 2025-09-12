@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    /* Opções de Tipo de Checagem */
+    "strict": true, // Habilita todas as verificações de tipo estritas. Essencial para Clean Code.
+    "esModuleInterop": true, // Permite compatibilidade entre módulos CommonJS e ES Modules.
+    "forceConsistentCasingInFileNames": true, // Garante que os imports usem o mesmo casing do nome do arquivo.
+
+    /* Módulos */
+    "module": "commonjs", // O formato de módulo para o ambiente Node.js.
+    "moduleResolution": "node", // Como o TS busca os módulos.
+    "resolveJsonModule": true, // Permite importar arquivos .json.
+
+    /* Saída */
+    "target": "ES2020", // Versão do JavaScript que será gerada. ES2020 é bem suportado.
+    "outDir": "./dist", // Diretório de saída para os arquivos JavaScript compilados.
+    "rootDir": "./src", // Diretório raiz onde está seu código-fonte TypeScript.
+    "sourceMap": true, // Gera arquivos .map que ajudam a debugar o código TypeScript no ambiente de execução.
+
+    /* Performance */
+    "skipLibCheck": true // Pula a verificação de tipos em arquivos de declaração (.d.ts), acelerando a compilação.
+  },
+  "include": ["src/**/*"], // Quais arquivos o compilador deve incluir.
+  "exclude": ["node_modules", "dist"] // Quais arquivos e pastas devem ser ignorados.
+}
